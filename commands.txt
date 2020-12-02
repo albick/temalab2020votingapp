@@ -1,0 +1,43 @@
+environment:
+VMware VM ubuntu1804lts 3gb ram 2core
+
+docker install:
+sudo apt install curl -y
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo usermod -aG docker $USER
+relog
+
+microk8s install:
+sudo apt install snap
+sudo snap install microk8s --classic
+sudo usermod -a -G microk8s $USER
+sudo snap alias microk8s.kubectl kubectl
+#relog
+microk8s enable dns
+
+dockerfiles:
+
+
+docker login --username=albick99
+~/Work/temalab01/example-voting-app4/vote$ docker build -t vote_im .
+docker images
+docker tag 51a0b85d830f albick99/vote_im
+docker push albick99/vote_im
+
+~/Work/temalab01/example-voting-app4/result$ docker build -t result_im .
+docker images
+docker tag 497117c08cdc albick99/result_im
+docker push albick99/result_im
+
+~/Work/temalab01/example-voting-app4/worker$ docker build -t worker_im .
+docker images
+docker tag 270f51cdc8bf albick99/worker_im
+docker push albick99/worker_im
+
+
+deployment&service:
+kubectl create namespace vote
+~/Work/temalab01/example-voting-app4$ kubectl create -f mk8s/
+kubectl get po -n vote
+
